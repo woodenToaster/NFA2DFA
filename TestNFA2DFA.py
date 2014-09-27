@@ -35,7 +35,10 @@ class TestRegex(unittest.TestCase):
 		self.assertEqual(nfa.start_state, "1")
 		self.assertEqual(nfa.final_states, ["11"])
 		self.assertEqual(nfa.total_states, "11")
-		self.assertEqual(nfa.input_alphabet, ["a", "b"])
+		self.assertEqual(nfa.input_alphabet, ['a', 'b', 'E'])
+		self.assertEqual(nfa.transition_table[1], {'a': '{}', 'b': '{}', 'E': '{2,5}'})
+		self.assertEqual(nfa.transition_table[8], {'a': '{}', 'b': '{}', 'E': '{9,11}'})
+		self.assertEqual(nfa.transition_table[9], {'a': '{10}', 'b': '{}', 'E': '{}'})
 
 	def tearDown(self):
 		self.f.close()
