@@ -1,8 +1,8 @@
-import unittest
+import cutest as unittest
 import re
 import NFA2DFA
 
-class TestRegex(unittest.TestCase):
+class TestNFA2DFA(unittest.TestCase):
 
 	f = None
 
@@ -39,6 +39,21 @@ class TestRegex(unittest.TestCase):
 		self.assertEqual(nfa.transition_table[1], {'a': '{}', 'b': '{}', 'E': '{2,5}'})
 		self.assertEqual(nfa.transition_table[8], {'a': '{}', 'b': '{}', 'E': '{9,11}'})
 		self.assertEqual(nfa.transition_table[9], {'a': '{10}', 'b': '{}', 'E': '{}'})
+
+	def test_E_closure(self):
+		#Ensures E_closure() returns the correct string
+		nfa = NFA2DFA.NFA()
+		nfa.create_NFA_from_file()
+		self.assertEqual(NFA2DFA.E_closure(1, nfa), '{1,2,5}')
+		self.assertEqual(NFA2DFA.E_closure(10, nfa), '{10,9,11}')
+
+	def test_move(self):
+		#Ensures move function returns correct possible moves
+		nfa = NFA2DFA.NFA()
+		nfa.create_NFA_from_file()
+		self.assertEqual(NFA2DFA.move('{1}', 'a', nfa), '{}')
+		self.assertEqual(NFA2DFA.move('{9}', 'a', nfa), '{10}')
+		self.assertEqual(NFA2DFA.move('{3,5,6}', 'b', nfa), '{4,6}')
 
 	def tearDown(self):
 		self.f.close()
