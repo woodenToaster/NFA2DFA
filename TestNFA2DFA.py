@@ -44,8 +44,12 @@ class TestNFA2DFA(unittest.TestCase):
 		#Ensures E_closure() returns the correct string
 		nfa = NFA2DFA.NFA()
 		nfa.create_NFA_from_file()
-		self.assertEqual(NFA2DFA.E_closure('{1}', nfa), '{1,2,5}')
-		self.assertEqual(NFA2DFA.E_closure('{10}', nfa), '{10,9,11}')
+		NFA2DFA.closure_result = []
+		self.assertEqual(NFA2DFA.stringify_closure_result(NFA2DFA.E_closure('{1}', nfa)), '{1,2,5}')
+		NFA2DFA.closure_result = []
+		self.assertEqual(NFA2DFA.stringify_closure_result(NFA2DFA.E_closure('{10}', nfa)), '{10,9,11}')
+		NFA2DFA.closure_result = []
+		self.assertEqual(NFA2DFA.stringify_closure_result(NFA2DFA.E_closure('{4}', nfa)), '{4,8,9,11}')
 
 	def test_move(self):
 		#Ensures move function returns correct possible moves
