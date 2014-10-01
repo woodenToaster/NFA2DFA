@@ -62,12 +62,13 @@ class TestNFA2DFA(unittest.TestCase):
 	def test_build_DFA_transition_table(self):
 		nfa = NFA2DFA.NFA()
 		nfa.create_NFA_from_file()
+		nfa.reset_closure
 		NFA2DFA.nfa_to_dfa(nfa)
 		NFA2DFA.build_DFA_transition_table(nfa)
 		table = {1: {'a': '{2}', 'b': '{3}'}, 2: {'a': '{}', 'b': '{4}'},
 				 3: {'a': '{5}', 'b': '{}'}, 4: {'a': '{6}', 'b': '{}'},
 				 5: {'a': '{6}', 'b': '{}'}, 6: {'a': '{6}', 'b': '{}'}}
-		self.assertEqual(nfa.build_DFA_transition_table, table)
+		self.assertEqual(nfa.DFA_transition_table, table)
 
 	def tearDown(self):
 		self.f.close()

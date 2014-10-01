@@ -25,7 +25,7 @@ class NFA:
 			and be located in the same directory as this script. """
 
 		#Match one or more digits
-		f = open('input.txt', 'r')
+		f =  open('input2.txt', 'r')#sys.stdin
 		regex1 = re.compile(r"\d+")
 		self.start_state = regex1.search(f.readline()).group()
 
@@ -70,15 +70,13 @@ class NFA:
 		print("Final States: {%s}" % (','.join(self.final_states)))
 		print("Total States: %s" % (self.total_states))
 		print("State", end='')
-		for symbol in self.input_alphabet:
+		for symbol in self.input_alphabet[:-1]:
 			print("\t%s" % symbol, end='')
 		print('')
 		for state in range(1, int(self.total_states) + 1):
 			print("%s" % state, end='')
-			for symbol in self.input_alphabet:
-				print("State: %s Symbol: %s" % (state, symbol))
-				print(self.transition_table)
-				print("\t%s" % self.transition_table[str(state)][symbol], end='')
+			for symbol in self.input_alphabet[:-1]:
+				print("\t%s" % self.DFA_transition_table[state][symbol], end='')
 			print('')
 
 #The list of states to be marked
@@ -87,14 +85,18 @@ new_states = {}
 def mark(state):
 	marked_states[state] = True
 
+previous_state = 'start'
+
 def E_closure(states, nfa):
 	
-	if states != '{}':
+	global previous_state
+	if states != '{}' and states != previous_state:
+		previous_state = states
 		list_of_states = states.strip('{}').split(',')
 		for state in list_of_states:
 			nfa.closure_result.append(state)
 			nfa.closure_result.append(E_closure(nfa.transition_table[int(state)]['E'], nfa))
-			
+		
 	return nfa.closure_result
 	
 def stringify_closure_result(closure_result):
@@ -111,6 +113,8 @@ def move(states, symbol, nfa):
 	results = ','.join(move_results)
 	return "{%s}" % (re.sub(r'[\{\}]', '', results).strip(','))
 
+#Keep track of which states have been marked.
+#'0' is a sentinal so we can start at index 1
 marked_states = ['0']
 
 def nfa_to_dfa(nfa):
@@ -181,17 +185,18 @@ def build_DFA_transition_table(nfa):
 			#'{x,y,...,z}' where x,y,...,z are the results of the closure
 			#of the move results on input 'symbol' in state 'state'
 			nfa.reset_closure()
-			table_entry = new_states.get(stringify_closure_result(
+			table_entry = stringify_closure_result(
 				E_closure(
-					move("%s" % new_states[state], symbol, nfa), nfa)))
+					move("%s" % new_states[state], symbol, nfa), nfa))
 			#find key for value of table_entry
 			for key, val in new_states.items():
 				if val == table_entry:
 					nfa.DFA_transition_table[state][symbol] = "{%s}" % key
+			if symbol not in nfa.DFA_transition_table[state].keys():
+				nfa.DFA_transition_table[state][symbol] = '{}'
 
 nfa = NFA()
 nfa.create_NFA_from_file()
 nfa_to_dfa(nfa)
 build_DFA_transition_table(nfa)
-print(nfa.DFA_transition_table)
-#nfa.print_automaton()
+nfa.print_automaton()
