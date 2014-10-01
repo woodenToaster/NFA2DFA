@@ -44,11 +44,11 @@ class TestNFA2DFA(unittest.TestCase):
 		#Ensures E_closure() returns the correct string
 		nfa = NFA2DFA.NFA()
 		nfa.create_NFA_from_file()
-		NFA2DFA.closure_result = []
+		nfa.reset_closure()
 		self.assertEqual(NFA2DFA.stringify_closure_result(NFA2DFA.E_closure('{1}', nfa)), '{1,2,5}')
-		NFA2DFA.closure_result = []
+		nfa.reset_closure()
 		self.assertEqual(NFA2DFA.stringify_closure_result(NFA2DFA.E_closure('{10}', nfa)), '{10,9,11}')
-		NFA2DFA.closure_result = []
+		nfa.reset_closure()
 		self.assertEqual(NFA2DFA.stringify_closure_result(NFA2DFA.E_closure('{4}', nfa)), '{4,8,9,11}')
 
 	def test_move(self):
@@ -58,6 +58,16 @@ class TestNFA2DFA(unittest.TestCase):
 		self.assertEqual(NFA2DFA.move('{1}', 'a', nfa), '{}')
 		self.assertEqual(NFA2DFA.move('{9}', 'a', nfa), '{10}')
 		self.assertEqual(NFA2DFA.move('{3,5,6}', 'b', nfa), '{4,6}')
+
+	def test_build_DFA_transition_table(self):
+		nfa = NFA2DFA.NFA()
+		nfa.create_NFA_from_file()
+		NFA2DFA.nfa_to_dfa(nfa)
+		NFA2DFA.build_DFA_transition_table(nfa)
+		table = {1: {'a': '{2}', 'b': '{3}'}, 2: {'a': '{}', 'b': '{4}'},
+				 3: {'a': '{5}', 'b': '{}'}, 4: {'a': '{6}', 'b': '{}'},
+				 5: {'a': '{6}', 'b': '{}'}, 6: {'a': '{6}', 'b': '{}'}}
+		self.assertEqual(nfa.build_DFA_transition_table, table)
 
 	def tearDown(self):
 		self.f.close()

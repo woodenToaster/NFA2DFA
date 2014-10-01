@@ -76,7 +76,9 @@ class NFA:
 		for state in range(1, int(self.total_states) + 1):
 			print("%s" % state, end='')
 			for symbol in self.input_alphabet:
-				print("\t%s" % self.transition_table[state][symbol], end='')
+				print("State: %s Symbol: %s" % (state, symbol))
+				print(self.transition_table)
+				print("\t%s" % self.transition_table[str(state)][symbol], end='')
 			print('')
 
 #The list of states to be marked
@@ -95,15 +97,6 @@ def E_closure(states, nfa):
 			
 	return nfa.closure_result
 	
-	#for state in list_of_states:
-	#	closure_result.append(state)
-	#	if nfa.transition_table[int(state)]['E'] != '{}':
-	#		closure_result.extend(nfa.transition_table[int(state)]['E'].strip('{}').split(','))
-	#if closure_result:
-	#	return "{%s}" % (','.join(closure_result))
-	#else:
-	#	return '{}'
-
 def stringify_closure_result(closure_result):
 	string_result = [x for x in closure_result if not isinstance(x, list)]
 	return "{%s}" % (','.join(string_result))
@@ -117,7 +110,6 @@ def move(states, symbol, nfa):
 			move_results.append(result)
 	results = ','.join(move_results)
 	return "{%s}" % (re.sub(r'[\{\}]', '', results).strip(','))
-
 
 marked_states = ['0']
 
@@ -136,7 +128,8 @@ def nfa_to_dfa(nfa):
 
 	next_state_to_move = 1
 
-	while True:
+	loop = True
+	while loop:
 		
 		mark(next_state_to_move)
 		print("Mark %s" % next_state_to_move)
@@ -149,44 +142,56 @@ def nfa_to_dfa(nfa):
 						symbol, 
 						move_result)
 					)
-				if move_result != '{}' and move_result not in new_states.values():
-					new_states_incrementer = new_states_incrementer + 1
 					nfa.reset_closure()
-					new_states[new_states_incrementer] = stringify_closure_result(
-						E_closure(move_result, nfa)
-					)
-					marked_states.append(False)
-					print("E-closure%s = %s = %s" % (
-						move_result, 
-						new_states[new_states_incrementer], 
-						new_states_incrementer)
-					)
-		loop = True
+					closure_result = stringify_closure_result(E_closure(move_result, nfa))
+					if closure_result not in new_states.values():
+						new_states_incrementer = new_states_incrementer + 1
+						new_states[new_states_incrementer] = closure_result
+						marked_states.append(False)
+						print("E-closure%s = %s = %s" % (
+							move_result, 
+							new_states[new_states_incrementer], 
+							new_states_incrementer)
+						)
+					else:
+						print("E-closure%s = %s = %s" % (
+							move_result, 
+							new_states[new_states_incrementer],
+							new_states_incrementer)
+						)
+
+		loop = False
 		next_state_to_move = next_state_to_move + 1
 		print('')
 		if False in marked_states:
 			loop = True
-		if loop == False:
-			break
+	#build DFA output
+	nfa.total_states = len(marked_states) - 1
+	new_final_states = []
+	for key, value in new_states.items():
+		for v in value.strip("{}").split(','):
+			if v in nfa.final_states:
+				new_final_states.append(str(key))
+	nfa.final_states = new_final_states
 
-	#while new_states:
-	#	closure = E_closure(new_states_incr, nfa)
-	#	print("E-closure({%s}) = %s = %s" % (state, closure, new_states_incr))
-	#	new_states_incr = new_states[-1] + 1
-	#	nfa.DFA_states[state] = closure 
-	#	mark(state)
-	#	print("Mark %s" % state)
-	#	#Move on each input symbol for this state except 'E'
-	#	for symbol in nfa.input_alphabet[:-1]:
-	#		new_state = move(closure, symbol, nfa)
-	#		print("%s --%s--> %s" % (closure, symbol, new_state))
-	#		if new_state not in new_states and new_state != '{}':
-	#			new_states.append(int(new_state.strip('{}')))
-	
-
-
+def build_DFA_transition_table(nfa):
+	for state in range(1, len(new_states) + 1):
+		nfa.DFA_transition_table[state] = {}
+		for symbol in nfa.input_alphabet[:-1]:
+			#'{x,y,...,z}' where x,y,...,z are the results of the closure
+			#of the move results on input 'symbol' in state 'state'
+			nfa.reset_closure()
+			table_entry = new_states.get(stringify_closure_result(
+				E_closure(
+					move("%s" % new_states[state], symbol, nfa), nfa)))
+			#find key for value of table_entry
+			for key, val in new_states.items():
+				if val == table_entry:
+					nfa.DFA_transition_table[state][symbol] = "{%s}" % key
 
 nfa = NFA()
 nfa.create_NFA_from_file()
 nfa_to_dfa(nfa)
+build_DFA_transition_table(nfa)
 print(nfa.DFA_transition_table)
+#nfa.print_automaton()
