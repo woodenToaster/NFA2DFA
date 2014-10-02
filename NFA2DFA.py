@@ -85,18 +85,18 @@ new_states = {}
 def mark(state):
 	marked_states[state] = True
 
-previous_state = 'start'
 
 def E_closure(states, nfa):
 	
-	global previous_state
-	if states != '{}' and states != previous_state:
+	if states != '{}':
 		previous_state = states
 		list_of_states = states.strip('{}').split(',')
 		for state in list_of_states:
+			if state in nfa.closure_result:
+				continue
 			nfa.closure_result.append(state)
 			nfa.closure_result.append(E_closure(nfa.transition_table[int(state)]['E'], nfa))
-		
+
 	return nfa.closure_result
 	
 def stringify_closure_result(closure_result):
