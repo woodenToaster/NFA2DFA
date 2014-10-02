@@ -25,7 +25,7 @@ class NFA:
 			and be located in the same directory as this script. """
 
 		#Match one or more digits
-		f =  open('input2.txt', 'r')#sys.stdin
+		f =  sys.stdin
 		regex1 = re.compile(r"\d+")
 		self.start_state = regex1.search(f.readline()).group()
 
