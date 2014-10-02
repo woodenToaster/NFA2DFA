@@ -177,7 +177,8 @@ def nfa_to_dfa(nfa):
 	for key, value in new_states.items():
 		for v in value.strip("{}").split(','):
 			if v in nfa.final_states:
-				new_final_states.append(str(key))
+				if str(key) not in new_final_states:
+					new_final_states.append(str(key))
 	nfa.final_states = new_final_states
 
 def build_DFA_transition_table(nfa):
