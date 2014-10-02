@@ -85,15 +85,16 @@ new_states = {}
 def mark(state):
 	marked_states[state] = True
 
-
 def E_closure(states, nfa):
 	
 	if states != '{}':
 		previous_state = states
 		list_of_states = states.strip('{}').split(',')
 		for state in list_of_states:
+			#Avoid infinite recursion 
 			if state in nfa.closure_result:
 				continue
+			#The state itself is always part of the closure
 			nfa.closure_result.append(state)
 			nfa.closure_result.append(E_closure(nfa.transition_table[int(state)]['E'], nfa))
 
@@ -149,6 +150,7 @@ def nfa_to_dfa(nfa):
 					nfa.reset_closure()
 					closure_result = stringify_closure_result(E_closure(move_result, nfa))
 					if closure_result not in new_states.values():
+						#A new state is being added to new_states
 						new_states_incrementer = new_states_incrementer + 1
 						new_states[new_states_incrementer] = closure_result
 						marked_states.append(False)
